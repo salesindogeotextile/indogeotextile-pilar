@@ -104,9 +104,10 @@ export default function App() {
            - Tag Diizinkan: <h1>, <h2>, <h3>, <p>, <ul>, <ol>, <li>, <strong>, <blockquote>.
            - Link: <a href="URL">anchor text</a> (Hanya di dalam <p> atau <li>).
            - Output: Mulai langsung dari <h1>, tanpa <html>/<body>.
-        3. TABEL DATA SEO (Format Markdown Table):
-           - Judul Artikel, Judul SEO (max 60 char), Slug, Meta Description (~140 char), Excerpt (50-80 kata), Tags (max 5).
-           - Format: Horizontal (1 baris header, 1 baris data).
+        3. DATA SEO (Format Tab-Separated):
+           - Isi: Judul Artikel, Judul SEO, Slug, Meta Description, Excerpt, Tags.
+           - ATURAN: TANPA HEADER, TANPA PIPA (|), TANPA TABEL. Gunakan TAB (\t) sebagai pemisah antar nilai dalam SATU BARIS. Jangan gunakan simbol (:, ;, |) pada judul.
+           - Outputkan di dalam blok kode: ${'```'}seo [data_disini] ${'```'}
         
         VALIDASI: Pastikan tidak ada link di heading dan isi teks 100% konsisten antar format.
       `;
@@ -291,55 +292,44 @@ export default function App() {
                     </div>
                   </section>
 
-                  {/* Card 2: SEO Data & HTML */}
+                  {/* Card 2: SEO Data Only */}
                   <section className="bg-blue-50/50 rounded-2xl border border-blue-100 shadow-sm overflow-hidden">
                     <div className="px-8 py-6 flex items-start justify-between">
                       <div className="space-y-1">
-                        <h2 className="text-lg font-bold text-blue-900 tracking-tight leading-none uppercase">Data SEO & HTML Source</h2>
-                        <p className="text-[11px] text-blue-600/70 font-medium">Data ini siap untuk ditempel ke spreadsheet atau CMS Anda secara mekanis.</p>
+                        <h2 className="text-lg font-bold text-blue-900 tracking-tight leading-none uppercase">DATA SEO YANG DIBUTUHKAN</h2>
+                        <p className="text-[11px] text-blue-600/70 font-medium">Data ini siap untuk ditempel ke spreadsheet atau CMS Anda.</p>
                       </div>
                       <div className="flex gap-2">
                         <button 
                           onClick={() => {
-                            const htmlMatch = state.content.match(/```html([\s\S]*?)```/);
-                            if (htmlMatch) {
-                              navigator.clipboard.writeText(htmlMatch[1].trim());
-                              alert("HTML berhasil disalin!");
+                            const seoMatch = state.content.match(/```seo([\s\S]*?)```/);
+                            if (seoMatch) {
+                              navigator.clipboard.writeText(seoMatch[1].trim());
+                              alert("Data SEO berhasil disalin!");
+                            } else {
+                              // Fallback if regex fails
+                              const parts = state.content.split('```');
+                              if (parts.length >= 2) {
+                                navigator.clipboard.writeText(parts[parts.length-2].trim());
+                                alert("Data SEO disalin!");
+                              }
                             }
                           }}
                           className="px-4 py-2 bg-white border border-blue-200 rounded-lg text-blue-600 text-[10px] font-bold uppercase tracking-wider hover:bg-blue-50 transition-all flex items-center gap-2 shadow-sm"
                         >
-                          <FileText className="w-3 h-3" /> Salin HTML (Source)
+                          <BarChart3 className="w-3 h-3" /> Salin Data SEO (TXT)
                         </button>
                       </div>
                     </div>
 
                     <div className="px-8 pb-10 space-y-8">
-                      {/* Sub-section: HTML Code Block */}
-                      {state.content.includes('```html') && (
+                      {/* SEO Data Box */}
+                      {state.content.includes('```seo') && (
                         <div className="bg-white rounded-xl border border-blue-100/50 shadow-inner overflow-hidden">
-                          <div className="px-4 py-2 bg-slate-800 text-white/50 text-[9px] font-bold uppercase tracking-widest flex justify-between items-center">
-                            <span>Clean HTML Code (SEO Friendly)</span>
-                            <span className="text-blue-400">Read-Only View</span>
-                          </div>
-                          <pre className="m-0 bg-[#1e293b] text-blue-100/80 text-[11px] overflow-x-auto p-6 max-h-[400px] leading-relaxed custom-scrollbar font-mono">
-                            <code>{state.content.match(/```html([\s\S]*?)```/)?.[1].trim()}</code>
-                          </pre>
-                        </div>
-                      )}
-
-                      {/* Sub-section: SEO Table */}
-                      {state.content.includes('|') && (
-                        <div className="bg-white rounded-xl border border-blue-100/50 shadow-md overflow-hidden">
-                          <div className="px-4 py-3 bg-blue-600 text-white text-[10px] font-bold uppercase tracking-widest">
-                            SEO Metadata Table
-                          </div>
-                          <div className="overflow-x-auto p-2">
-                          <div className="prose-table:min-w-full prose-table:text-[11px] prose-th:bg-slate-50 prose-th:p-4 prose-th:text-blue-900 prose-td:p-4 prose-td:border prose-td:border-slate-100 prose-td:text-slate-600 prose-th:border prose-th:border-slate-200">
-                            <ReactMarkdown>
-                              {state.content.split('```').pop()?.split('\n').filter(l => l.includes('|')).join('\n')}
-                            </ReactMarkdown>
-                          </div>
+                          <div className="overflow-x-auto p-6 scrollbar-thin scrollbar-thumb-blue-200">
+                            <div className="min-w-[1200px] font-mono text-[13px] text-slate-700 whitespace-pre">
+                              {state.content.match(/```seo([\s\S]*?)```/)?.[1].trim()}
+                            </div>
                           </div>
                         </div>
                       )}
@@ -433,9 +423,9 @@ export default function App() {
               <button 
                 onClick={() => {
                   if (state.content) {
-                    const seoPart = state.content.split('```').pop()?.split('\n').filter(l => l.includes('|')).join('\n');
-                    if (seoPart) {
-                      navigator.clipboard.writeText(seoPart.trim());
+                    const seoMatch = state.content.match(/```seo([\s\S]*?)```/);
+                    if (seoMatch) {
+                      navigator.clipboard.writeText(seoMatch[1].trim());
                       alert("Data SEO berhasil disalin!");
                     } else {
                       alert("Data SEO belum tersedia.");
