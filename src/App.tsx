@@ -135,26 +135,6 @@ export default function App() {
       setState(prev => ({ ...prev, isGenerating: false, progress: 0 }));
     }
   };
-import { useEffect } from 'react';
-
-useEffect(() => {
-  const params = new URLSearchParams(window.location.search);
-
-  const keyword = params.get('frasa') || '';
-  const anchorText = params.get('anchor_text') || '';
-  const url = params.get('url') || '';
-
-  const supportKeywords = Array(10).fill('').map((_, i) => {
-    return params.get(`anchor${i + 1}`) || '';
-  });
-
-  setConfig({
-    keyword,
-    anchorText,
-    url,
-    supportKeywords
-  });
-}, []);
 
   return (
     <div className="flex flex-col h-screen bg-[#f1f5f9] font-sans text-[#334155]">
