@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-
+import { useState } from 'react';
 import { 
   FileText, 
   BarChart3, 
@@ -39,32 +38,6 @@ export default function App() {
       cta: false,
     },
   });
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-
-    const keyword = params.get('frasa') ?? '';
-    const anchorText = params.get('anchor_text') ?? '';
-    const url = params.get('url') ?? '';
-
-    const supportKeywords = Array.from({ length: 10 }, (_, i) =>
-      params.get(`anchor${i + 1}`) ?? ''
-    );
-
-    setConfig({
-      keyword,
-      anchorText,
-      url,
-      supportKeywords
-    });
-
-    console.log("PARAM:", {
-      keyword,
-      anchorText,
-      url,
-      supportKeywords
-    });
-
-  }, []);
 
   const handleInputChange = (field: keyof SEOConfig, value: string) => {
     setConfig(prev => ({ ...prev, [field]: value }));
@@ -84,10 +57,15 @@ export default function App() {
       isGenerating: true, 
       content: '', 
       progress: 5,
-      eeatScore: 45
+      eeatScore: 45,
+      error: undefined
     }));
 
     try {
+      if (!process.env.GEMINI_API_KEY) {
+        throw new Error("API Key Gemini tidak ditemukan. Jika Anda menggunakan platform eksternal (seperti Vercel), silakan tambahkan GEMINI_API_KEY di pengaturan environment variable Anda.");
+      }
+
       // Simulate progress for better UX
       const progressInterval = setInterval(() => {
         setState(prev => {
@@ -134,7 +112,7 @@ export default function App() {
       `;
 
       const response = await genAI.models.generateContent({
-        model: "gemini-3.1-pro-preview",
+        model: "gemini-3-flash-preview", // Optimal for basic text tasks
         contents: prompt,
       });
 
@@ -157,9 +135,14 @@ export default function App() {
         }
       }));
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Generation failed:", error);
-      setState(prev => ({ ...prev, isGenerating: false, progress: 0 }));
+      setState(prev => ({ 
+        ...prev, 
+        isGenerating: false, 
+        progress: 0,
+        error: error.message || "Gagal membangun konten. Silakan periksa koneksi atau API Key."
+      }));
     }
   };
 
@@ -263,6 +246,24 @@ export default function App() {
           </div>
           <div className="flex-1 overflow-y-auto bg-white custom-scrollbar">
             <div className="max-w-[850px] mx-auto p-8 space-y-10 py-12">
+              {state.error && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-8 flex items-start gap-4">
+                  <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center shrink-0">
+                    <span className="text-red-600 font-bold">!</span>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-red-900 uppercase tracking-tight">Terjadi Kesalahan</h3>
+                    <p className="text-xs text-red-600 mt-1 leading-relaxed">{state.error}</p>
+                    <button 
+                      onClick={generateArticle}
+                      className="mt-3 text-[10px] font-bold text-red-700 underline uppercase tracking-widest hover:text-red-900"
+                    >
+                      Coba Lagi
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {state.content ? (
                 <div className="space-y-10">
                   {/* Card 1: Article Preview */}

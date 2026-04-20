@@ -18,4 +18,5 @@ export interface GenerationState {
     faq: boolean;
     cta: boolean;
   };
+  error?: string;
 }
