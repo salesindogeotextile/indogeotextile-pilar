@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   FileText, 
   BarChart3, 
@@ -38,6 +38,32 @@ export default function App() {
       cta: false,
     },
   });
+useEffect(() => {
+  const params = new URLSearchParams(window.location.search);
+
+  const keyword = params.get('frasa') ?? '';
+  const anchorText = params.get('anchor_text') ?? '';
+  const url = params.get('url') ?? '';
+
+  const supportKeywords = Array.from({ length: 10 }, (_, i) =>
+    params.get(`anchor${i + 1}`) ?? ''
+  );
+
+  setConfig({
+    keyword,
+    anchorText,
+    url,
+    supportKeywords
+  });
+
+  console.log("PARAM:", {
+    keyword,
+    anchorText,
+    url,
+    supportKeywords
+  });
+
+}, []);
 
   const handleInputChange = (field: keyof SEOConfig, value: string) => {
     setConfig(prev => ({ ...prev, [field]: value }));
