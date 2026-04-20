@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+
 import { 
   FileText, 
   BarChart3, 
@@ -25,6 +26,35 @@ export default function App() {
   });
 
   const [state, setState] = useState<GenerationState>({
+    useEffect(() => {
+  const params = new URLSearchParams(window.location.search);
+
+  console.log("PARAM RAW:", window.location.search);
+
+  const keyword = params.get('frasa') ?? '';
+  const anchorText = params.get('anchor_text') ?? '';
+  const url = params.get('url') ?? '';
+
+  const supportKeywords = Array.from({ length: 10 }, (_, i) =>
+    params.get(`anchor${i + 1}`) ?? ''
+  );
+
+  console.log("HASIL PARSE:", {
+    keyword,
+    anchorText,
+    url,
+    supportKeywords
+  });
+
+  setConfig({
+    keyword,
+    anchorText,
+    url,
+    supportKeywords
+  });
+
+}, []);
+
     isGenerating: false,
     content: '',
     progress: 0,
