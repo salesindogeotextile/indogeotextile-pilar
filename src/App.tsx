@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { 
   FileText, 
   BarChart3, 
@@ -38,32 +38,6 @@ export default function App() {
       cta: false,
     },
   });
-useEffect(() => {
-  const params = new URLSearchParams(window.location.search);
-
-  const keyword = params.get('frasa') ?? '';
-  const anchorText = params.get('anchor_text') ?? '';
-  const url = params.get('url') ?? '';
-
-  const supportKeywords = Array.from({ length: 10 }, (_, i) =>
-    params.get(`anchor${i + 1}`) ?? ''
-  );
-
-  setConfig({
-    keyword,
-    anchorText,
-    url,
-    supportKeywords
-  });
-
-  console.log("PARAM:", {
-    keyword,
-    anchorText,
-    url,
-    supportKeywords
-  });
-
-}, []);
 
   const handleInputChange = (field: keyof SEOConfig, value: string) => {
     setConfig(prev => ({ ...prev, [field]: value }));
@@ -114,22 +88,42 @@ useEffect(() => {
         INTERNAL LINK (Artikel Utama):
         Anchor Text: ${config.anchorText || config.keyword}
         URL: ${config.url || 'https://indogeotextile.com'}
+        - ATURAN: Hanya sertakan SATU (1) referensi link internal artikel utama ini di seluruh artikel agar tetap terlihat natural.
         
-        GAYA PENULISAN:
+        GAYA PENULISAN & KONTEN:
         - Profesional, teknis-populer, persuasif.
         - Fokus EEAT (Experience, Expertise, Authoritativeness, Trustworthiness).
         - Search intent: komersial untuk industri konstruksi, infrastruktur, pengadaan.
         - ANTI-THIN CONTENT: Setiap paragraf harus panjang, mendalam, dan berisi informasi substansial. Hindari kalimat retoris yang kosong.
         - PARAGRAF MENDALAM: Gunakan 5-8 kalimat per paragraf untuk menjelaskan konsep teknis secara menyeluruh.
+        - FORMAT KATA KUNCI: Cetak TEBAL (Bold) setiap penyebutan 10 Kata Kunci Pendukung di atas dalam artikel (baik di Heading maupun di dalam paragraf) untuk memudahkan identifikasi link nantinya.
+        - INSIGHT PRAKTIS (WAJIB): Sertakan contoh kasus lapangan (case studies), daftar kesalahan umum (common pitfalls), dan solusi teknis yang spesifik.
+        
+        Instruksi Structured Data:
+        - Gunakan pendekatan penulisan yang mendukung penerapan schema markup secara natural (Article, FAQPage, dan Organization).
+        - Pastikan bagian FAQ (WAJIB berjumlah 5 pertanyaan) ditulis jelas agar mudah diubah menjadi FAQ schema (pertanyaan sebagai heading H3, jawaban sebagai paragraf).
+        
+        Instruksi CTA & Conversion Link (WAJIB DIPATUHI):
+        - Sertakan CTA kontekstual yang relevan dan profesional pada:
+          • akhir artikel,
+          • atau penutup pembahasan teknis yang berkaitan dengan pengambilan keputusan proyek.
+        - CTA wajib menggunakan link berikut (tidak boleh dimodifikasi URL-nya):
+          1. Konsultasi teknis proyek: https://indogeotextile.com/konsultasi/
+          2. Permintaan informasi harga: https://indogeotextile.com/info-harga/
+          3. Kontak WhatsApp langsung: https://wa.me/message/WSI7AS6VJ3SBH1
+        - Penulisan link WAJIB menggunakan format Markdown: [anchor text](URL)
+        - Penempatan link: Max 1 link CTA per paragraf, total 2–3 link CTA dalam seluruh artikel. DILARANG menumpuk link.
+        - Gaya penulisan CTA: Solutif, informatif, profesional, dan tidak hard selling.
         
         STRUKTUR OUTPUT (WAJIB):
-        1. ARTIKEL UTAMA (Format Markdown untuk Preview).
-        2. HTML DATA (Format RAW HTML dalam Code Block):
+        1. ARTIKEL UTAMA (Format Markdown untuk Preview):
+           - Struktur: H1 -> Pendahuluan -> H2 (10 Topik) -> FAQ (WAJIB 5 pertanyaan) -> Kesimpulan persuasif (mengarahkan ke solusi produk).
+        2. (Format RAW HTML dalam Code Block):
            - Konversikan seluruh isi artikel ke HTML bersih.
            - Aturan Heading: <h1>, <h2>, <h3> WAJIB TEKS MURNI (ANTI-LINK).
            - Tag Diizinkan: <h1>, <h2>, <h3>, <p>, <ul>, <ol>, <li>, <strong>, <blockquote>.
            - Link: <a href="URL">anchor text</a> (Hanya di dalam <p> atau <li>).
-           - Output: Mulai langsung dari <h1>, tanpa <html>/<body>.
+           - Output: Mulai langsung dari <h1>, TANPA TEKS AWAL, tanpa <html>/<body>.
         3. DATA SEO (Format Tab-Separated):
            - Isi: Judul Artikel, Judul SEO, Slug, Meta Description, Excerpt, Tags.
            - ATURAN: TANPA HEADER, TANPA PIPA (|), TANPA TABEL. Gunakan TAB (\t) sebagai pemisah antar nilai dalam SATU BARIS. Jangan gunakan simbol (:, ;, |) pada judul.
@@ -422,7 +416,10 @@ useEffect(() => {
                 <CheckItem label="H2 minimal 3-4 subjudul" checked={state.checklist.h2} />
                 <CheckItem label="Internal Link Bold & Natural" checked={state.checklist.internalLink} />
                 <CheckItem label="Outbound Link Kredibel" checked={state.checklist.outboundLinks} />
-                <CheckItem label="FAQ Schema Terintegrasi" checked={state.checklist.faq} />
+                <CheckItem label="FAQ Schema (WAJIB 5 Pertanyaan)" checked={state.checklist.faq} />
+                <CheckItem label="Supporting Keywords Bold" checked={state.checklist.h2} />
+                <CheckItem label="Insight Praktis & Case Study" checked={state.checklist.cta} />
+                <CheckItem label="CTA & Conversion Link" checked={state.checklist.cta} />
                </ul>
             </div>
 
