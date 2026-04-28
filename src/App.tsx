@@ -38,32 +38,41 @@ export default function App() {
       cta: false,
     },
   });
-useEffect(() => {
-  const params = new URLSearchParams(window.location.search);
 
-  const keyword = params.get('frasa') ?? '';
-  const anchorText = params.get('anchor_text') ?? '';
-  const url = params.get('url') ?? '';
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
 
-  const supportKeywords = Array.from({ length: 10 }, (_, i) =>
-    params.get(`anchor${i + 1}`) ?? ''
-  );
+    const keyword = params.get('frasa') ?? '';
+    const anchorText = params.get('anchor_text') ?? '';
+    const url = params.get('url') ?? '';
 
-  setConfig({
-    keyword,
-    anchorText,
-    url,
-    supportKeywords
-  });
+    const supportKeywords = Array.from({ length: 10 }, (_, i) =>
+      params.get(`anchor${i + 1}`) ?? ''
+    );
 
-  console.log("PARAM:", {
-    keyword,
-    anchorText,
-    url,
-    supportKeywords
-  });
+    const initialConfig = {
+      keyword,
+      anchorText,
+      url,
+      supportKeywords
+    };
 
-}, []);
+    setConfig(initialConfig);
+
+    console.log("PARAM:", initialConfig);
+
+    // Auto-generate if keyword is present in URL
+    if (keyword) {
+      handleAutoGenerate(initialConfig);
+    }
+
+  }, []);
+
+  // Separate function to handle the async call from useEffect safely
+  const handleAutoGenerate = async (configData: SEOConfig) => {
+    await generateArticle(configData);
+  };
+
   const handleInputChange = (field: keyof SEOConfig, value: string) => {
     setConfig(prev => ({ ...prev, [field]: value }));
   };
@@ -74,8 +83,9 @@ useEffect(() => {
     setConfig(prev => ({ ...prev, supportKeywords: newKWs }));
   };
 
-  const generateArticle = async () => {
-    if (!config.keyword) return;
+  const generateArticle = async (manualConfig?: SEOConfig) => {
+    const activeConfig = manualConfig || config;
+    if (!activeConfig.keyword) return;
 
     setState(prev => ({ 
       ...prev, 
@@ -105,14 +115,14 @@ useEffect(() => {
       const prompt = `
         Tolong buatkan artikel pilar panjang (target 4.800–5.500 kata) dalam Bahasa Indonesia.
         
-        KATA KUNCI UTAMA (H1): ${config.keyword}
+        KATA KUNCI UTAMA (H1): ${activeConfig.keyword}
         
         KATA KUNCI PENDUKUNG (H2 - Wajib 10 topik):
-        ${config.supportKeywords.map((kw, i) => `${i + 1}. ${kw || `Topik Pendukung ${i+1}`}`).join('\n')}
+        ${activeConfig.supportKeywords.map((kw, i) => `${i + 1}. ${kw || `Topik Pendukung ${i+1}`}`).join('\n')}
         
         INTERNAL LINK (Artikel Utama):
-        Anchor Text: ${config.anchorText || config.keyword}
-        URL: ${config.url || 'https://indogeotextile.com'}
+        Anchor Text: ${activeConfig.anchorText || activeConfig.keyword}
+        URL: ${activeConfig.url || 'https://indogeotextile.com'}
         - ATURAN: Hanya sertakan SATU (1) referensi link internal artikel utama ini di seluruh artikel agar tetap terlihat natural.
         
         GAYA PENULISAN & KONTEN:
@@ -272,14 +282,14 @@ useEffect(() => {
           
           <div className="p-5 border-t border-[#e2e8f0] bg-[#fafafa]">
             <button 
-              onClick={generateArticle}
+              onClick={() => generateArticle()}
               disabled={state.isGenerating || !config.keyword}
               className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold py-3 rounded-md flex items-center justify-center gap-2 transition-all shadow-md active:scale-95"
             >
               {state.isGenerating ? (
                 <><Loader2 className="w-5 h-5 animate-spin" /> ARCHITECTING...</>
               ) : (
-                <><Zap className="w-5 h-5 fill-current" /> GENERATE PRODUCT</>
+                <><Sparkles className="w-5 h-5 fill-current" /> REGENERATE ARTICLE</>
               )}
             </button>
           </div>
@@ -301,7 +311,7 @@ useEffect(() => {
                     <h3 className="text-sm font-bold text-red-900 uppercase tracking-tight">Terjadi Kesalahan</h3>
                     <p className="text-xs text-red-600 mt-1 leading-relaxed">{state.error}</p>
                     <button 
-                      onClick={generateArticle}
+                      onClick={() => generateArticle()}
                       className="mt-3 text-[10px] font-bold text-red-700 underline uppercase tracking-widest hover:text-red-900"
                     >
                       Coba Lagi
